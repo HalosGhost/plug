@@ -59,7 +59,7 @@ main (signed argc, char * argv []) {
 
     for ( size_t i = 0; i < modcount; ++ i ) {
 
-        size_t (*modstep)(char **, bool);
+        size_t (*modstep)(char **);
         dlerror();
         *(void **)(&modstep) = dlsym(handles[i], "modstep");
         dlerr = dlerror();
@@ -81,7 +81,7 @@ main (signed argc, char * argv []) {
         }
 
         char * buf = malloc(*modsize);
-        modstep(&buf, false);
+        modstep(&buf);
         printf("%s\n", buf);
         free(buf);
     }

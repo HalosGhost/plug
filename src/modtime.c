@@ -8,9 +8,8 @@
 size_t modsize = sizeof DEFVALUE;
 
 size_t
-modstep (char ** buf, bool force_step) {
+modstep (char ** buf) {
 
-    (void )force_step;
     if ( !buf || !*buf ) {
         return 0;
     }

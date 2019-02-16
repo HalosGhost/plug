@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include <stdbool.h>
 #include <errno.h>
 #include <libgen.h>
 #include <unistd.h>
