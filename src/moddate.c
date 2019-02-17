@@ -5,10 +5,10 @@
 #define DEFVALUE "Wednesday, 01 September 00001"
 #define MODFORMAT "%A, %d %B %Y"
 
-size_t modsize = sizeof DEFVALUE;
+size_t size = sizeof DEFVALUE;
 
 size_t
-modstep (char ** buf) {
+step (char ** buf) {
 
     if ( !buf || !*buf ) {
         return 0;
@@ -16,6 +16,6 @@ modstep (char ** buf) {
 
     static time_t current;
     time(&current);
-    return strftime(*buf, modsize, MODFORMAT, localtime(&current));
+    return strftime(*buf, size, MODFORMAT, localtime(&current));
 }
 

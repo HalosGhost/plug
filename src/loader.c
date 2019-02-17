@@ -61,7 +61,7 @@ main (signed argc, char * argv []) {
 
         size_t (*modstep)(char **);
         dlerror();
-        *(void **)(&modstep) = dlsym(handles[i], "modstep");
+        *(void **)(&modstep) = dlsym(handles[i], "step");
         dlerr = dlerror();
 
         if ( dlerr ) {
@@ -72,7 +72,7 @@ main (signed argc, char * argv []) {
 
         size_t * modsize = 0;
         dlerror();
-        *(void **)(&modsize) = dlsym(handles[i], "modsize");
+        *(void **)(&modsize) = dlsym(handles[i], "size");
         dlerr = dlerror();
         if ( dlerr ) {
             fprintf(stderr, "Failed to find modsize: %s\n", dlerr);

@@ -9,10 +9,10 @@
 
 #define TARGET "x86_pkg_temp"
 
-size_t modsize = sizeof DEFVALUE;
+size_t size = sizeof DEFVALUE;
 
 size_t
-modstep (char ** buf) {
+step (char ** buf) {
 
     if ( !buf || !*buf ) { return 0; }
 
@@ -58,7 +58,7 @@ modstep (char ** buf) {
     fclose(f);
     temp = ret == EOF ? 0 : temp;
 
-    int res = snprintf(*buf, modsize, MODFORMAT, (signed char )(temp / 1000));
+    int res = snprintf(*buf, size, MODFORMAT, (signed char )(temp / 1000));
 
     return res > 0 ? (size_t )res : 0;
 }

@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern size_t modsize;
-
-size_t
-modstep (char **);
+extern size_t size;
+extern signed priority;
 
 signed
-modreset (void);
+init (void);
 
+size_t
+step (char **);
