@@ -62,11 +62,11 @@ step (char ** buf) {
     if ( !buf || !*buf ) { return 0; }
 
     FILE * f = fopen(temp_file, "r");
-    signed ret = fscanf(f, "%ld", &temp);
+    signed res = fscanf(f, "%ld", &temp);
     fclose(f);
-    temp = ret == EOF ? 0 : temp;
+    temp = res == EOF ? 0 : temp;
 
-    int res = snprintf(*buf, size, MODFORMAT, (signed char )(temp / 1000));
+    res = snprintf(*buf, size, MODFORMAT, (signed char )(temp / 1000));
 
     return res > 0 ? (size_t )res : 0;
 }
