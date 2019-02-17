@@ -9,3 +9,5 @@
 #include <sys/types.h>
 
 #define MAXMODS 100
+
+#define MODSEP " | "

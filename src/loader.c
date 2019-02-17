@@ -59,6 +59,13 @@ main (signed argc, char * argv []) {
 
     for ( size_t i = 0; i < modcount; ++ i ) {
 
+        signed (*modinit)(void);
+        dlerror();
+        *(void **)(&modinit) = dlsym(handles[i], "init");
+        dlerr = dlerror();
+
+        if ( !dlerr ) { signed init = modinit(); if ( !init ) { continue; } }
+
         size_t (*modstep)(char **);
         dlerror();
         *(void **)(&modstep) = dlsym(handles[i], "step");
@@ -82,9 +89,12 @@ main (signed argc, char * argv []) {
 
         char * buf = malloc(*modsize);
         modstep(&buf);
-        printf("%s\n", buf);
+        printf("%s", buf);
+        if ( i + 1 != modcount ) { printf(MODSEP); }
         free(buf);
     }
+
+    printf("\n");
 
     cleanup:
         (void)chdir(cwd);

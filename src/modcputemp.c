@@ -11,15 +11,14 @@
 
 size_t size = sizeof DEFVALUE;
 
-size_t
-step (char ** buf) {
+#define thermal_dir "/sys/class/thermal/"
+#define thermal_dev_size (sizeof thermal_dir + sizeof "cooling_device100/temp")
 
-    if ( !buf || !*buf ) { return 0; }
+static char temp_file [thermal_dev_size] = "";
+static signed long temp = 0;
 
-    #define thermal_dir "/sys/class/thermal/"
-    #define thermal_dev_size (sizeof thermal_dir + sizeof "cooling_device100/temp")
-    static char temp_file [thermal_dev_size] = "";
-    static signed long temp = 0;
+signed
+init (void) {
 
     if ( !temp_file[0] ) {
         DIR * outer = opendir(thermal_dir);
@@ -52,6 +51,14 @@ step (char ** buf) {
             if ( temp_file[0] ) { break; }
         }
     }
+
+    return 1;
+}
+
+size_t
+step (char ** buf) {
+
+    if ( !buf || !*buf ) { return 0; }
 
     FILE * f = fopen(temp_file, "r");
     signed ret = fscanf(f, "%ld", &temp);
