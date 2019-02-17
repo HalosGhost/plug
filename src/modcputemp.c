@@ -10,6 +10,7 @@
 #define TARGET "x86_pkg_temp"
 
 size_t size = sizeof DEFVALUE;
+signed priority = 70;
 
 #define thermal_dir "/sys/class/thermal/"
 #define thermal_dev_size (sizeof thermal_dir + sizeof "cooling_device100/temp")

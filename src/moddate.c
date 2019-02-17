@@ -6,6 +6,7 @@
 #define MODFORMAT "%A, %d %B %Y"
 
 size_t size = sizeof DEFVALUE;
+signed priority = 90;
 
 size_t
 step (char ** buf) {
