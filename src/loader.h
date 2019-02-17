@@ -11,3 +11,18 @@
 #define MAXMODS 100
 
 #define MODSEP " | "
+
+struct plugin {
+    signed * priority;
+    size_t * size;
+    signed (* init)(void);
+    size_t (* step)(char **);
+    char * buffer;
+};
+
+struct plugin
+load_plugin (void *);
+
+int
+compare_plugins (const void *, const void *);
+

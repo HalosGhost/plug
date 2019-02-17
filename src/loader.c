@@ -1,5 +1,7 @@
 #include "loader.h"
 
+static struct plugin plugins [MAXMODS];
+
 signed
 main (signed argc, char * argv []) {
 
@@ -8,7 +10,6 @@ main (signed argc, char * argv []) {
     signed status = EXIT_SUCCESS;
 
     void * handles [MAXMODS] = { 0 };
-    const char * dlerr = 0;
     size_t modcount = 0;
 
     char cwd [PATH_MAX] = "";
@@ -58,43 +59,31 @@ main (signed argc, char * argv []) {
     fprintf(stderr, "Loaded %zu module(s)\n", modcount);
 
     for ( size_t i = 0; i < modcount; ++ i ) {
+        plugins[i] = load_plugin(handles[i]);
+    }
 
-        signed (*modinit)(void);
-        dlerror();
-        *(void **)(&modinit) = dlsym(handles[i], "init");
-        dlerr = dlerror();
+    qsort(plugins, modcount, sizeof (struct plugin), compare_plugins);
 
-        if ( !dlerr ) { signed init = modinit(); if ( !init ) { continue; } }
+    for ( size_t i = 0; i < modcount; ++ i ) {
+        if ( !plugins[i].priority ) { continue; }
 
-        size_t (*modstep)(char **);
-        dlerror();
-        *(void **)(&modstep) = dlsym(handles[i], "step");
-        dlerr = dlerror();
+        if ( plugins[i].init ) { plugins[i].init(); }
+    }
 
-        if ( dlerr ) {
-            fprintf(stderr, "Failed to find modstep: %s\n", dlerr);
-            status = EXIT_FAILURE;
-            goto cleanup;
-        }
+    for ( size_t i = 0; i < modcount; ++ i ) {
+        if ( !plugins[i].priority ) { continue; }
 
-        size_t * modsize = 0;
-        dlerror();
-        *(void **)(&modsize) = dlsym(handles[i], "size");
-        dlerr = dlerror();
-        if ( dlerr ) {
-            fprintf(stderr, "Failed to find modsize: %s\n", dlerr);
-            status = EXIT_FAILURE;
-            goto cleanup;
-        }
-
-        char * buf = malloc(*modsize);
-        modstep(&buf);
-        printf("%s", buf);
-        if ( i + 1 != modcount ) { printf(MODSEP); }
-        free(buf);
+        plugins[i].step(&plugins[i].buffer);
+        printf("%s%s", plugins[i].buffer, i + 1 != modcount ? MODSEP : "");
     }
 
     printf("\n");
+
+    for ( size_t i = 0; i < modcount; ++ i ) {
+        if ( !plugins[i].priority ) { continue; }
+
+        free(plugins[i].buffer);
+    }
 
     cleanup:
         (void)chdir(cwd);
@@ -105,5 +94,58 @@ main (signed argc, char * argv []) {
         }
 
         return status;
+}
+
+struct plugin
+load_plugin (void * handle) {
+
+    struct plugin p;
+
+    const char * dlerr = 0;
+
+    dlerror();
+    *(void **)(&p.init) = dlsym(handle, "init");
+    dlerr = dlerror();
+
+    dlerror();
+    *(void **)(&p.step) = dlsym(handle, "step");
+    dlerr = dlerror();
+
+    if ( dlerr ) {
+        fprintf(stderr, "Failed to find step: %s\n", dlerr);
+        p.priority = 0;
+    }
+
+    dlerror();
+    *(void **)(&p.size) = dlsym(handle, "size");
+    dlerr = dlerror();
+    if ( dlerr ) {
+        fprintf(stderr, "Failed to find size: %s\n", dlerr);
+        p.priority = 0;
+    }
+
+    dlerror();
+    *(void **)(&p.priority) = dlsym(handle, "priority");
+    dlerr = dlerror();
+    if ( dlerr ) {
+        fprintf(stderr, "Failed to find priority: %s\n", dlerr);
+        p.priority = 0;
+    }
+
+    if ( !p.priority ) { return p; }
+
+    p.buffer = malloc(*p.size);
+
+    return p;
+}
+
+signed
+compare_plugins (const void * left, const void * right) {
+
+    signed l = *(((const struct plugin * )left)->priority);
+    signed r = *(((const struct plugin * )right)->priority);
+
+    return l < r ? -1 :
+           l > r ?  1 : 0;
 }
 
