@@ -14,7 +14,7 @@ bin: dist
 	@$(CC) $(CFLAGS) -pie $(LDFLAGS) src/loader.c -o dist/$(PROGNM)
 
 $(MODULES): dist/modules/%.so: src/mod%.c
-	@$(CC) $(CFLAGS) -fPIC -shared $< -o $@
+	@$(CC) $(CFLAGS) `pkg-config --libs-only-l alsa` -fPIC -shared $< -o $@
 
 clean:
 	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh ./src/*.plist
