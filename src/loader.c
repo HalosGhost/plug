@@ -69,13 +69,13 @@ main (signed argc, char * argv []) {
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( !plugins[i].priority ) { continue; }
 
-        if ( plugins[i].init ) { plugins[i].init(); }
+        if ( plugins[i].setup ) { plugins[i].setup(); }
     }
 
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( !plugins[i].priority ) { continue; }
 
-        plugins[i].step(&plugins[i].buffer);
+        plugins[i].play(&plugins[i].buffer);
         printf("%s%s", plugins[i].buffer, i + 1 != modcount ? MODSEP : "");
     }
 
@@ -103,13 +103,13 @@ load_plugin (void * handle) {
 
     struct plugin p;
 
-    *(void **)(&p.init) = dlsym(handle, "init");
+    *(void **)(&p.setup) = dlsym(handle, "setup");
 
-    *(void **)(&p.step) = dlsym(handle, "step");
+    *(void **)(&p.play) = dlsym(handle, "play");
     const char * dlerr = dlerror();
 
     if ( dlerr ) {
-        fprintf(stderr, "Failed to find step: %s\n", dlerr);
+        fprintf(stderr, "Failed to find play: %s\n", dlerr);
         p.priority = 0;
     }
 

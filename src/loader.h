@@ -15,8 +15,8 @@
 struct plugin {
     signed * priority;
     size_t * size;
-    signed (* init)(void);
-    size_t (* step)(char **);
+    signed (* setup)(void);
+    size_t (* play)(char **);
     char * buffer;
 };
 

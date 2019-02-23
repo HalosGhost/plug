@@ -27,13 +27,13 @@ static const char signal_bars [][22] = {
 };
 
 signed
-init (void) {
+setup (void) {
 
     return 1;
 }
 
 size_t
-step (char ** buf) {
+play (char ** buf) {
 
     if ( !buf || !*buf ) { return 0; }
 

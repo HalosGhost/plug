@@ -18,7 +18,7 @@ static long volume;
 static char mute;
 
 signed
-init (void) {
+setup (void) {
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -41,7 +41,7 @@ init (void) {
 }
 
 size_t
-step (char ** buf) {
+play (char ** buf) {
 
     if ( !buf || !*buf ) { return 0; }
 

@@ -19,7 +19,7 @@ static char temp_file [thermal_dev_size] = "";
 static signed long temp = 0;
 
 signed
-init (void) {
+setup (void) {
 
     if ( !temp_file[0] ) {
         DIR * outer = opendir(thermal_dir);
@@ -60,7 +60,7 @@ init (void) {
 }
 
 size_t
-step (char ** buf) {
+play (char ** buf) {
 
     if ( !buf || !*buf ) { return 0; }
 

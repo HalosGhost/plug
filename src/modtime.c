@@ -9,7 +9,7 @@ size_t size = sizeof DEFVALUE;
 signed priority = 80;
 
 size_t
-step (char ** buf) {
+play (char ** buf) {
 
     if ( !buf || !*buf ) {
         return 0;

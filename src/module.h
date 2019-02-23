@@ -8,7 +8,11 @@ extern size_t size;
 extern signed priority;
 
 signed
-init (void);
+setup (void);
 
 size_t
-step (char **);
+play (char **);
+
+signed
+teardown (void);
+
