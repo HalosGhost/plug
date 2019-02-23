@@ -13,6 +13,6 @@ setup (void);
 size_t
 play (char **);
 
-signed
+void
 teardown (void);
 

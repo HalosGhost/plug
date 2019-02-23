@@ -69,7 +69,9 @@ main (signed argc, char * argv []) {
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( !plugins[i].priority ) { continue; }
 
-        if ( plugins[i].setup ) { plugins[i].setup(); }
+        if ( plugins[i].setup ) {
+            if ( !plugins[i].setup() ) { plugins[i].priority = 0; continue; }
+        }
     }
 
     for ( size_t i = 0; i < modcount; ++ i ) {
@@ -82,10 +84,7 @@ main (signed argc, char * argv []) {
     printf("\n");
 
     for ( size_t i = 0; i < modcount; ++ i ) {
-        if ( !plugins[i].priority ) { continue; }
-
         if ( plugins[i].teardown ) { plugins[i].teardown(); }
-
         free(plugins[i].buffer);
     }
 
