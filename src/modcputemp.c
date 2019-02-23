@@ -41,16 +41,19 @@ init (void) {
                 char contents [sizeof TARGET] = "";
                 errno = 0;
                 signed ret = fscanf(f, "%[^ ]", contents);
-                if ( ret == EOF && errno ) { continue; }
                 fclose(f);
+                if ( ret == EOF && errno ) { continue; }
                 if ( !strncmp(TARGET, contents, sizeof TARGET - 1) ) {
                     snprintf(temp_file, thermal_dev_size, thermal_dir "%s/temp", p->d_name);
                     break;
                 }
             }
 
+            closedir(inner);
             if ( temp_file[0] ) { break; }
         }
+
+        closedir(outer);
     }
 
     return 1;
