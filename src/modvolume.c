@@ -66,3 +66,11 @@ play (char ** buf) {
     return res > 0 ? (size_t )res : 0;
 }
 
+void
+teardown (void) {
+
+    snd_hctl_close(alsa_handle);
+    if ( alsa_control ) { snd_ctl_elem_value_free(alsa_control); }
+    if ( alsa_sid ) { snd_ctl_elem_id_free(alsa_sid); }
+}
+
