@@ -84,6 +84,8 @@ main (signed argc, char * argv []) {
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( !plugins[i].priority ) { continue; }
 
+        if ( plugins[i].teardown ) { plugins[i].teardown(); }
+
         free(plugins[i].buffer);
     }
 
@@ -107,11 +109,12 @@ load_plugin (void * handle) {
 
     *(void **)(&p.play) = dlsym(handle, "play");
     const char * dlerr = dlerror();
-
     if ( dlerr ) {
         fprintf(stderr, "Failed to find play: %s\n", dlerr);
         p.priority = 0;
     }
+
+    *(void **)(&p.teardown) = dlsym(handle, "teardown");
 
     dlerror();
     *(void **)(&p.size) = dlsym(handle, "size");

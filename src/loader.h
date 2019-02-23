@@ -17,6 +17,7 @@ struct plugin {
     size_t * size;
     signed (* setup)(void);
     size_t (* play)(char **);
+    signed (* teardown)(void);
     char * buffer;
 };
 
