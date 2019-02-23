@@ -7,7 +7,7 @@
 #define MODFORMAT "A: %hhd%c"
 
 size_t size = sizeof DEFVALUE;
-signed priority = 60;
+signed priority = 50;
 
 #define audio_dev "default"
 

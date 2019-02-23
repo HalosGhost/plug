@@ -10,7 +10,7 @@
 #define MODFORMAT "%s: %s"
 
 size_t size = sizeof DEFVALUE;
-signed priority = 50;
+signed priority = 40;
 
 #define wl_iface "wlp3s0"
 #define wl_path "/proc/net/wireless"
