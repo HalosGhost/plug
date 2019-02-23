@@ -30,6 +30,8 @@ main (signed argc, char * argv []) {
         fprintf(stderr, "Failed to cd to %s: %s\n", modpath, strerror(errno));
     }
 
+    free(modpath);
+
     DIR * modules = opendir(".");
     if ( !modules ) {
         fprintf(stderr, "Failed to open modules directory: %s\n", strerror(errno));
@@ -101,15 +103,10 @@ load_plugin (void * handle) {
 
     struct plugin p;
 
-    const char * dlerr = 0;
-
-    dlerror();
     *(void **)(&p.init) = dlsym(handle, "init");
-    dlerr = dlerror();
 
-    dlerror();
     *(void **)(&p.step) = dlsym(handle, "step");
-    dlerr = dlerror();
+    const char * dlerr = dlerror();
 
     if ( dlerr ) {
         fprintf(stderr, "Failed to find step: %s\n", dlerr);
