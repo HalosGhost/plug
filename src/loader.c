@@ -77,7 +77,7 @@ main (signed argc, char * argv []) {
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( !plugins[i].priority ) { continue; }
 
-        plugins[i].play(&plugins[i].buffer);
+        if ( !plugins[i].play(&plugins[i].buffer) ) { continue; }
         printf("%s%s", plugins[i].buffer, i + 1 != modcount ? MODSEP : "");
     }
 
