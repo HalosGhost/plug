@@ -26,12 +26,6 @@ static const char signal_bars [][22] = {
     "No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"
 };
 
-signed
-setup (void) {
-
-    return 1;
-}
-
 size_t
 play (char ** buf) {
 

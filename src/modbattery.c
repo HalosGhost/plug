@@ -23,12 +23,6 @@ static char time_estimate [25] = "";
 static long running;
 static long samples;
 
-signed
-setup (void) {
-
-    return 1;
-}
-
 size_t
 play (char ** buf) {
 
