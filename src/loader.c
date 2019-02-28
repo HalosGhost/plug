@@ -19,10 +19,12 @@ main (signed argc, char * argv []) {
         fprintf(stderr, "Failed to get cwd: %s\n", strerror(errno));
     }
 
-    size_t modpathlen = strlen(argv[0]) + sizeof "/modules";
+    char * basepath = argc > 1 && argv[1] ? argv[1] : dirname(argv[0]);
+
+    size_t modpathlen = strlen(basepath) + sizeof "/modules";
     char * modpath = malloc(modpathlen);
 
-    snprintf(modpath, modpathlen, "%s/modules", dirname(argv[0]));
+    snprintf(modpath, modpathlen, "%s/modules", basepath);
 
     errno = 0;
     signed res1 = chdir(modpath);
