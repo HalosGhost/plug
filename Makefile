@@ -1,17 +1,23 @@
-PROGNM =  dyload
+PROGNM =  plug
 PREFIX ?= /usr/local
 BINDIR ?= $(DESTDIR)$(PREFIX)/bin
+LIBDIR ?= $(DESTDIR)$(PREFIX)/lib
+INCDIR ?= $(DESTDIR)$(PREFIX)/include
 MODULES = $(patsubst src/mod%.c, dist/modules/%.so, $(wildcard src/mod*.c))
 
 include Makerules
 CFLAGS += -Wno-disabled-macro-expansion
 
-.PHONY: all bin clean scan-build cov-build install uninstall
+.PHONY: all bin clean scan-build lib cov-build install uninstall
 
 all: dist bin $(MODULES)
 
-bin: dist
-	@$(CC) $(CFLAGS) -pie $(LDFLAGS) src/loader.c -o dist/$(PROGNM)
+lib: dist
+	@$(CC) $(CFLAGS) -fPIC -shared $(LDFLAGS) src/loader.c -o dist/lib$(PROGNM).so
+	@install -Dm644 src/$(PROGNM).h dist/$(PROGNM).h
+
+bin: lib
+	@$(CC) $(CFLAGS) -fPIE $(LDFLAGS) src/main.c -Ldist -l$(PROGNM) -o dist/$(PROGNM)
 
 $(MODULES): dist/modules/%.so: src/mod%.c
 	@$(CC) $(CFLAGS) `pkg-config --libs-only-l alsa` -fPIC -shared $< -o $@
@@ -31,6 +37,8 @@ scan-build:
 
 install:
 	@install -Dm755 dist/$(PROGNM) $(BINDIR)/$(PROGNM)
+	@install -Dm755 dist/lib$(PROGNM).so $(LIBDIR)/lib$(PROGNM).so
+	@install -Dm755 dist/$(PROGNM).h $(INCDIR)/$(PROGNM).h
 
 uninstall:
-	@rm -f -- $(BINDIR)/$(PROGNM)
+	@rm -f -- $(BINDIR)/$(PROGNM) $(LIBDIR)/lib$(PROGNM).so $(INCDIR)/$(PROGNM).h
