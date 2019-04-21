@@ -1,10 +1,13 @@
-dyload
-======
+plug
+====
 
 **This is a proof-of-concept.**
 
 It is intended to be inspirational and instructive; it is not intended to be production-quality code.
 The above in-mind, some steps have been taken to be reasonably portable and stable.
+
+:code:`plug` is intended to serve as a framework for a configurable status bar, for the moment.
+It will eventually allow for callbacks so that you can have it do whatever you want with the plugin output; but, for the moment, it will support writing plugin output to the X root window's name (for WMs like dwm), or stdout.
 
 tl;dr
 -----
