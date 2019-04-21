@@ -8,7 +8,7 @@ MODULES = $(patsubst src/mod%.c, dist/modules/%.so, $(wildcard src/mod*.c))
 include Makerules
 CFLAGS += -Wno-disabled-macro-expansion
 
-.PHONY: all bin clean scan-build lib cov-build install uninstall
+.PHONY: all bin clean scan-build lib cov-build test install uninstall
 
 all: dist bin $(MODULES)
 
@@ -34,6 +34,9 @@ cov-build: dist
 
 scan-build:
 	@scan-build --use-cc=$(CC) make all
+
+test: all
+	@(pushd dist; LD_LIBRARY_PATH=. ./$(PROGNM))
 
 install:
 	@install -Dm755 dist/$(PROGNM) $(BINDIR)/$(PROGNM)
