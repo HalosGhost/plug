@@ -124,10 +124,6 @@ play (char ** buf) {
         power *= -1;
     }
 
-    if ( status != CHARGING && status != DISCHARGING ) {
-        return EXIT_SUCCESS;
-    }
-
     if ( samples == LONG_MAX || running > INT_MAX - rate || power_old < 0 != power < 0) {
         samples = 1;
         running = rate;
@@ -137,8 +133,8 @@ play (char ** buf) {
     }
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
-    unsigned long hours = seconds / 3600 > 999 ? 999 : seconds / 3600;
-    unsigned long minutes = (seconds - hours * 3600) / 60;
+    unsigned long hours = (seconds / 3600 > 999 ? 999 : seconds / 3600) % 99;
+    unsigned long minutes = ((seconds - hours * 3600) / 60) % 60;
 
     const char * when = status == CHARGING ? "replenished" : "depleted";
 
