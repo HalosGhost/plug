@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 
 #define DEFVALUE "B: 100% (+100W) 999:59 till replenished"
 #define MODFORMAT "B: %hhu%% (%+.2lgW)%s"
@@ -118,7 +119,7 @@ play (char ** buf) {
     unsigned long target = cur_capacity;
     double power_old = power;
 
-    power = (signed long )-voltage_now * rate / 1000000.;
+    power = round(((signed long )-voltage_now * rate / 100000.)) / 10;
     if ( status == CHARGING ) {
         target = max_capacity - cur_capacity;
         power *= -1;
@@ -133,11 +134,13 @@ play (char ** buf) {
     }
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
-    unsigned long hours = (seconds / 3600 > 999 ? 999 : seconds / 3600) % 99;
-    unsigned long minutes = ((seconds - hours * 3600) / 60) % 60;
+
+    #define min(l, r) (((l) < (r)) ? (l) : (r))
+    unsigned long hours = min(seconds / 3600, 999);
+    unsigned long minutes = min((seconds - hours * 3600) / 60, 59);
+    #undef min
 
     const char * when = status == CHARGING ? "replenished" : "depleted";
-
     signed res = 0;
     if ( hours || minutes || seconds ) {
         res = snprintf(time_estimate, 25, " %.2lu:%.2lu till %s", hours, minutes, when);
