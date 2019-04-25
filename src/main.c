@@ -1,6 +1,14 @@
+#include <signal.h>
+#include <unistd.h>
+
 #include "plug.h"
 
 static struct plugin plugins [MAXMODS];
+
+static volatile sig_atomic_t caught_signum;
+
+void
+signal_handler (signed);
 
 signed
 main (signed argc, char * argv []) {
@@ -8,6 +16,11 @@ main (signed argc, char * argv []) {
     if ( !argc ) { return EXIT_FAILURE; }
 
     signed status = EXIT_SUCCESS;
+
+    signal(SIGINT,  signal_handler);
+    signal(SIGQUIT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    fputs("\x1b[?25l", stdout);
 
     void * handles [MAXMODS] = { 0 };
     size_t modcount = 0;
@@ -76,21 +89,30 @@ main (signed argc, char * argv []) {
         }
     }
 
-    for ( size_t i = 0; i < modcount; ++ i ) {
-        if ( !plugins[i].priority ) { continue; }
+    for (;; sleep(1)) {
+        if ( !!caught_signum ) {
+            goto teardown;
+        }
 
-        if ( !plugins[i].play(&plugins[i].buffer) ) { continue; }
-        printf("%s%s", plugins[i].buffer, i + 1 != modcount ? MODSEP : "");
+        for ( size_t i = 0; i < modcount; ++ i ) {
+            if ( !plugins[i].priority ) { continue; }
+
+            if ( !plugins[i].play(&plugins[i].buffer) ) { continue; }
+            printf("%s%s", plugins[i].buffer, i + 1 != modcount ? MODSEP : "");
+        }
+
+        putchar('\r');
+        fflush(stdout);
     }
 
-    printf("\n");
-
+    teardown:
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( plugins[i].teardown ) { plugins[i].teardown(); }
         free(plugins[i].buffer);
     }
 
     cleanup:
+        fputs("\x1b[?25h", stdout);
         (void)chdir(cwd);
         if ( modules ) { closedir(modules); }
 
@@ -100,3 +122,10 @@ main (signed argc, char * argv []) {
 
         return status;
 }
+
+void
+signal_handler (signed signum) {
+
+    caught_signum = (sig_atomic_t )signum;
+}
+
