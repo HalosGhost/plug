@@ -69,7 +69,9 @@ play (char ** buf) {
     fclose(f);
     temp = res == EOF ? 0 : temp;
 
-    res = snprintf(*buf, size, MODFORMAT, (signed char )(temp / 1000));
+    while ( temp > 100 ) { temp /= 10; }
+
+    res = snprintf(*buf, size, MODFORMAT, (signed char )temp);
 
     return res > 0 ? (size_t )res : 0;
 }
