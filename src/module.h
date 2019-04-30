@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #define READ_ENV(cvar, def) \
-const char * cvar = 0; \
 do { \
     (cvar) = getenv(#def); \
     (cvar) = (cvar) ? (cvar) : (def); \
