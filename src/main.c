@@ -3,8 +3,6 @@
 
 #include "plug.h"
 
-static struct plugin plugins [MAXMODS];
-
 static volatile sig_atomic_t caught_signum;
 
 void
@@ -22,16 +20,6 @@ main (signed argc, char * argv []) {
     signal(SIGTERM, signal_handler);
     fputs("\x1b[?25l", stdout);
 
-    void * handles [MAXMODS] = { 0 };
-    size_t modcount = 0;
-
-    char cwd [PATH_MAX] = "";
-    errno = 0;
-    char * res = getcwd(cwd, PATH_MAX - 1);
-    if ( !res ) {
-        fprintf(stderr, "Failed to get cwd: %s\n", strerror(errno));
-    }
-
     char * basepath = argc > 1 && argv[1] ? argv[1] : dirname(argv[0]);
 
     size_t modpathlen = strlen(basepath) + sizeof "/modules";
@@ -39,39 +27,33 @@ main (signed argc, char * argv []) {
 
     snprintf(modpath, modpathlen, "%s/modules", basepath);
 
-    errno = 0;
-    signed res1 = chdir(modpath);
-    if ( res1 ) {
-        fprintf(stderr, "Failed to cd to %s: %s\n", modpath, strerror(errno));
+    char ** paths = discover_plugins(modpath);
+
+    void ** handles = 0;
+    struct plugin * plugins = 0;
+
+    size_t modcount = 0;
+    for ( char ** p = paths; *p; p++, modcount++ );
+
+    if ( !modcount ) { goto cleanup; }
+
+    handles = malloc(sizeof(void *) * modcount);
+    memset(handles, 0, sizeof(void *) * modcount);
+
+    plugins = malloc(sizeof(struct plugin) * modcount);
+    memset(plugins, 0, sizeof(struct plugin) * modcount);
+
+    for ( size_t i = 0; i < modcount; ++i ) {
+        size_t len = modpathlen + strlen(paths[i]) + 2;
+        char * fullpath = malloc(len);
+        snprintf(fullpath, len, "%s/%s", modpath, paths[i]);
+        handles[i] = dlopen(fullpath, RTLD_LAZY);
+
+        free(fullpath);
+        free(paths[i]);
     }
 
-    free(modpath);
-
-    DIR * modules = opendir(".");
-    if ( !modules ) {
-        fprintf(stderr, "Failed to open modules directory: %s\n", strerror(errno));
-        status = EXIT_FAILURE;
-        goto cleanup;
-    }
-
-    for ( struct dirent * p = readdir(modules); p; p = readdir(modules) ) {
-        if ( modcount == MAXMODS ) { break; }
-
-        size_t len = strlen(p->d_name);
-        if ( !strncmp(".so", p->d_name + len - 3, 3) ) {
-            size_t pathlen = len + sizeof "./" + 1;
-            char * path = malloc(pathlen);
-            snprintf(path, pathlen, "./%s", p->d_name);
-            handles[modcount] = dlopen(path, RTLD_LAZY);
-            if ( !handles[modcount] ) {
-                fprintf(stderr, "Failed to load module: %s\n", dlerror());
-            } else {
-                ++modcount;
-            }
-
-            free(path);
-        }
-    }
+    free(paths);
 
     fprintf(stderr, "Loaded %zu module(s)\n", modcount);
 
@@ -113,12 +95,15 @@ main (signed argc, char * argv []) {
 
     cleanup:
         fputs("\x1b[?25h", stdout);
-        (void)chdir(cwd);
-        if ( modules ) { closedir(modules); }
+        if ( modpath ) { free(modpath); }
 
-        for ( size_t i = 0; i < modcount; ++ i ) {
-            if ( handles[i] ) { dlclose(handles[i]); }
+        if ( handles ) {
+            for ( size_t i = 0; i < modcount; ++ i ) {
+                if ( handles[i] ) { dlclose(handles[i]); }
+            }
         }
+
+        if ( plugins ) { free(plugins); }
 
         return status;
 }

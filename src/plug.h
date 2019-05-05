@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#define MAXMODS 100
-
 #define MODSEP " | "
 
 struct plugin {
@@ -26,4 +24,7 @@ load_plugin (void *);
 
 int
 compare_plugins (const void *, const void *);
+
+char**
+discover_plugins (const char *);
 
