@@ -101,6 +101,8 @@ main (signed argc, char * argv []) {
             for ( size_t i = 0; i < modcount; ++ i ) {
                 if ( handles[i] ) { dlclose(handles[i]); }
             }
+
+            free(handles);
         }
 
         if ( plugins ) { free(plugins); }
