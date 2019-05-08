@@ -1,7 +1,8 @@
 plug
 ====
 
-**This is a proof-of-concept.**
+**This is just a proof-of-concept—it is not intended for use in-production.**
+**Use at your own risk.**
 
 It is intended to be inspirational and instructive; it is not intended to be production-quality code.
 The above in-mind, some steps have been taken to be reasonably portable and stable.
