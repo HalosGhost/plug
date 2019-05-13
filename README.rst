@@ -19,7 +19,7 @@ Therefore, if you are looking for a simple, portable system for modules, this is
 features
 --------
 
-* Can load up to 100 modules (could easily be increased with a discovery step)
+* Discovers and loads an arbitrary number of plugins
 * Automatically allocates a buffer according to each module's requested size
 * Outputs the results of each module
 
