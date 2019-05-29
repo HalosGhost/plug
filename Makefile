@@ -4,6 +4,7 @@ BINDIR ?= $(DESTDIR)$(PREFIX)/bin
 LIBDIR ?= $(DESTDIR)$(PREFIX)/lib
 INCDIR ?= $(DESTDIR)$(PREFIX)/include
 MODULES = $(patsubst src/mod%.c, dist/modules/%.so, $(wildcard src/mod*.c))
+MKDIR ?= mkdir -p
 
 include Makerules
 CFLAGS += -Wno-disabled-macro-expansion
@@ -26,7 +27,7 @@ clean:
 	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh ./src/*.plist
 
 dist:
-	@mkdir -p ./dist/modules
+	@$(MKDIR) ./dist/modules
 
 cov-build: dist
 	@cov-build --dir cov-int ./make.sh
