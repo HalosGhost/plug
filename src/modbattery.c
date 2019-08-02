@@ -116,6 +116,10 @@ play (char ** buf) {
                                  energy_full_design ? energy_full_design : 0;
     unsigned long cur_capacity = charge_now ? charge_now : energy_now;
 
+    if ( !cur_capacity ) {
+        cur_capacity = max_capacity * capacity / 100;
+    }
+
     unsigned long target = cur_capacity;
     double power_old = power;
 
