@@ -7,7 +7,6 @@ MODULES = $(patsubst src/mod%.c, dist/modules/%.so, $(wildcard src/mod*.c))
 MKDIR ?= mkdir -p
 
 include Makerules
-CFLAGS += -Wno-disabled-macro-expansion
 
 .PHONY: all bin clean scan-build lib cov-build test install uninstall
 
