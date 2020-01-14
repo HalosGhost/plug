@@ -4,7 +4,7 @@
 #include <linux/wireless.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <stropts.h>
+#include <sys/ioctl.h>
 
 #define DEFVALUE "Long Wireless Network Name: ▂▃▄▅▆▇█"
 #define MODFORMAT "%s: %s"
