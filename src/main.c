@@ -76,6 +76,8 @@ main (signed argc, char * argv []) {
             goto teardown;
         }
 
+        fputs("\x1b[2K", stdout);
+
         for ( size_t i = 0; i < modcount; ++ i ) {
             if ( !plugins[i].priority ) { continue; }
 
