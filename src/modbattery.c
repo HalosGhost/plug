@@ -49,12 +49,10 @@ play (char ** buf) {
                   energy_now = 0,
                   charge_now = 0;
 
-    char keybuf [64] = "", // pretty sure it should never be larger than 32
-         val    [64] = "";
+    char key [sizeof "CONSTANT_CHARGE_CURRENT_MAX"] = "", // largest defined key
+         val [24] = "";
 
-    while ( fscanf(in, "%[^=]=%s\n", keybuf, val) != EOF ) {
-        char * key = keybuf + sizeof("POWER_SUPPLY_") - 1; // ignore nul byte
-
+    while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
         if ( !strncmp(key, "STATUS", 6) ) {
             switch ( val[0] ) {
                 case 'D': status = DISCHARGING; break;
