@@ -52,32 +52,34 @@ play (char ** buf) {
     char key [sizeof "CONSTANT_CHARGE_CURRENT_MAX"] = "", // largest defined key
          val [24] = "";
 
+    #define key_eq(str) (!strncmp(key, (str), ((sizeof str) - 1)))
+
     while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
-        if ( !strncmp(key, "STATUS", 6) ) {
+        if ( key_eq("STATUS") ) {
             switch ( val[0] ) {
                 case 'D': status = DISCHARGING; break;
                 case 'C': status = CHARGING; break;
                 case 'F': status = FULL; break;
             }
-        } else if ( !strncmp(key, "POWER_NOW", 9) ) {
+        } else if ( key_eq("POWER_NOW") ) {
             sscanf(val, "%ld", &power_now);
-        } else if ( !strncmp(key, "CURRENT_NOW", 11) ) {
+        } else if ( key_eq("CURRENT_NOW") ) {
             sscanf(val, "%ld", &current_now);
-        } else if ( !strncmp(key, "VOLTAGE_NOW", 11) ) {
+        } else if ( key_eq("VOLTAGE_NOW") ) {
             sscanf(val, "%lu", &voltage_now);
-        } else if ( !strncmp(key, "ENERGY_FULL_DESIGN", 18) ) {
+        } else if ( key_eq("ENERGY_FULL_DESIGN") ) {
             sscanf(val, "%lu", &energy_full_design);
-        } else if ( !strncmp(key, "ENERGY_FULL", 11) ) {
+        } else if ( key_eq("ENERGY_FULL") ) {
             sscanf(val, "%lu", &energy_full);
-        } else if ( !strncmp(key, "CHARGE_FULL_DESIGN", 18) ) {
+        } else if ( key_eq("CHARGE_FULL_DESIGN") ) {
             sscanf(val, "%lu", &charge_full_design);
-        } else if ( !strncmp(key, "CHARGE_FULL", 11) ) {
+        } else if ( key_eq("CHARGE_FULL") ) {
             sscanf(val, "%lu", &charge_full);
-        } else if ( !strncmp(key, "ENERGY_NOW", 10) ) {
+        } else if ( key_eq("ENERGY_NOW") ) {
             sscanf(val, "%lu", &energy_now);
-        } else if ( !strncmp(key, "CHARGE_NOW", 10) ) {
+        } else if ( key_eq("CHARGE_NOW") ) {
             sscanf(val, "%lu", &charge_now);
-        } else if ( !strncmp(key, "CAPACITY", 8) ) {
+        } else if ( key_eq("CAPACITY") ) {
             sscanf(val, "%hhu", &capacity);
         }
     }
