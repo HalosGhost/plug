@@ -38,7 +38,6 @@ play (char ** buf) {
         return EXIT_FAILURE;
     }
 
-    enum { DISCHARGING, EMPTY, CHARGING, FULL } status = EMPTY;
     long power_now = 0,
          current_now = 0;
     unsigned long voltage_now = 0,
@@ -52,15 +51,13 @@ play (char ** buf) {
     char key [sizeof "CONSTANT_CHARGE_CURRENT_MAX"] = "", // largest defined key
          val [24] = "";
 
+    char stat_char = 'U';
+
     #define key_eq(str) (!strncmp(key, (str), ((sizeof str) - 1)))
 
     while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
         if ( key_eq("STATUS") ) {
-            switch ( val[0] ) {
-                case 'D': status = DISCHARGING; break;
-                case 'C': status = CHARGING; break;
-                case 'F': status = FULL; break;
-            }
+            sscanf(val, "%c", &stat_char);
         } else if ( key_eq("POWER_NOW") ) {
             sscanf(val, "%ld", &power_now);
         } else if ( key_eq("CURRENT_NOW") ) {
@@ -85,6 +82,16 @@ play (char ** buf) {
     }
 
     fclose(in);
+
+    enum battery_status {
+        CHARGING = 'C',
+        DISCHARGING = 'D',
+        EMPTY = 'E',
+        FULL = 'F',
+        UNKNOWN = 'U'
+    };
+
+    enum battery_status status = strchr("CDEFU", stat_char) ? (enum battery_status )stat_char : UNKNOWN;
 
     voltage_now /= 1000;
     voltage_now = voltage_now ? voltage_now : 1;
