@@ -17,7 +17,6 @@
 size_t size = sizeof DEFVALUE;
 signed priority = 60;
 
-static unsigned char capacity;
 static double power;
 static char time_estimate [25] = "";
 
@@ -28,14 +27,14 @@ static long samples;
     X(char, "STATUS", "%c", stat_char) \
     X(long, "POWER_NOW", "%ld", power_now) \
     X(long, "CURRENT_NOW", "%ld", current_now) \
-    X(long, "VOLTAGE_NOW", "%lu", voltage_now) \
-    X(long, "ENERGY_FULL_DESIGN", "%lu", energy_full_design) \
-    X(long, "ENERGY_FULL", "%lu", energy_full) \
-    X(long, "CHARGE_FULL_DESIGN", "%lu", charge_full_design) \
-    X(long, "CHARGE_FULL", "%lu", charge_full) \
-    X(long, "ENERGY_NOW", "%lu", energy_now) \
-    X(long, "CHARGE_NOW", "%lu", charge_now) \
-    X(long, "CAPACITY", "%hhu", capacity)
+    X(unsigned long, "VOLTAGE_NOW", "%lu", voltage_now) \
+    X(unsigned long, "ENERGY_FULL_DESIGN", "%lu", energy_full_design) \
+    X(unsigned long, "ENERGY_FULL", "%lu", energy_full) \
+    X(unsigned long, "CHARGE_FULL_DESIGN", "%lu", charge_full_design) \
+    X(unsigned long, "CHARGE_FULL", "%lu", charge_full) \
+    X(unsigned long, "ENERGY_NOW", "%lu", energy_now) \
+    X(unsigned long, "CHARGE_NOW", "%lu", charge_now) \
+    X(unsigned char, "CAPACITY", "%hhu", capacity)
 
 size_t
 play (char ** buf) {
@@ -51,7 +50,7 @@ play (char ** buf) {
         return EXIT_FAILURE;
     }
 
-    #define X(t, k, f, v) t v = 0;
+    #define X(t, k, f, v) static t v = 0;
     FOR_EACH_UEVENT_PROPERTY
     #undef X
 
