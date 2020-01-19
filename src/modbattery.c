@@ -124,7 +124,7 @@ play (char ** buf) {
         power *= -1;
     }
 
-    if ( samples == LONG_MAX || running > INT_MAX - rate || power_old < 0 != power < 0) {
+    if ( samples == LONG_MAX || running > INT_MAX - rate || ((power_old < 0) != (power < 0)) ) {
         samples = 1;
         running = rate;
     } else {
