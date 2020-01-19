@@ -24,6 +24,19 @@ static char time_estimate [25] = "";
 static long running;
 static long samples;
 
+#define FOR_EACH_UEVENT_PROPERTY \
+    X(char, "STATUS", "%c", stat_char) \
+    X(long, "POWER_NOW", "%ld", power_now) \
+    X(long, "CURRENT_NOW", "%ld", current_now) \
+    X(long, "VOLTAGE_NOW", "%lu", voltage_now) \
+    X(long, "ENERGY_FULL_DESIGN", "%lu", energy_full_design) \
+    X(long, "ENERGY_FULL", "%lu", energy_full) \
+    X(long, "CHARGE_FULL_DESIGN", "%lu", charge_full_design) \
+    X(long, "CHARGE_FULL", "%lu", charge_full) \
+    X(long, "ENERGY_NOW", "%lu", energy_now) \
+    X(long, "CHARGE_NOW", "%lu", charge_now) \
+    X(long, "CAPACITY", "%hhu", capacity)
+
 size_t
 play (char ** buf) {
 
@@ -38,48 +51,24 @@ play (char ** buf) {
         return EXIT_FAILURE;
     }
 
-    long power_now = 0,
-         current_now = 0;
-    unsigned long voltage_now = 0,
-                  energy_full_design = 0,
-                  energy_full = 0,
-                  charge_full = 0,
-                  charge_full_design = 0,
-                  energy_now = 0,
-                  charge_now = 0;
+    #define X(t, k, f, v) t v = 0;
+    FOR_EACH_UEVENT_PROPERTY
+    #undef X
 
     char key [sizeof "CONSTANT_CHARGE_CURRENT_MAX"] = "", // largest defined key
          val [24] = "";
 
-    char stat_char = 'U';
-
-    #define key_eq(str) (!strncmp(key, (str), ((sizeof str) - 1)))
+    #define X(t, k, f, v) \
+        if ( !strncmp(key, (k), ((sizeof (k) - 1))) ) { \
+            sscanf(val, f, &v); \
+        } else
 
     while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
-        if ( key_eq("STATUS") ) {
-            sscanf(val, "%c", &stat_char);
-        } else if ( key_eq("POWER_NOW") ) {
-            sscanf(val, "%ld", &power_now);
-        } else if ( key_eq("CURRENT_NOW") ) {
-            sscanf(val, "%ld", &current_now);
-        } else if ( key_eq("VOLTAGE_NOW") ) {
-            sscanf(val, "%lu", &voltage_now);
-        } else if ( key_eq("ENERGY_FULL_DESIGN") ) {
-            sscanf(val, "%lu", &energy_full_design);
-        } else if ( key_eq("ENERGY_FULL") ) {
-            sscanf(val, "%lu", &energy_full);
-        } else if ( key_eq("CHARGE_FULL_DESIGN") ) {
-            sscanf(val, "%lu", &charge_full_design);
-        } else if ( key_eq("CHARGE_FULL") ) {
-            sscanf(val, "%lu", &charge_full);
-        } else if ( key_eq("ENERGY_NOW") ) {
-            sscanf(val, "%lu", &energy_now);
-        } else if ( key_eq("CHARGE_NOW") ) {
-            sscanf(val, "%lu", &charge_now);
-        } else if ( key_eq("CAPACITY") ) {
-            sscanf(val, "%hhu", &capacity);
+        FOR_EACH_UEVENT_PROPERTY {
+            continue;
         }
     }
+    #undef X
 
     fclose(in);
 
