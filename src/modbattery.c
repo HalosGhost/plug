@@ -28,12 +28,14 @@ static long samples;
     X(long, "POWER_NOW", "%ld", power_now) \
     X(long, "CURRENT_NOW", "%ld", current_now) \
     X(unsigned long, "VOLTAGE_NOW", "%lu", voltage_now) \
-    X(unsigned long, "ENERGY_FULL_DESIGN", "%lu", energy_full_design) \
-    X(unsigned long, "ENERGY_FULL", "%lu", energy_full) \
-    X(unsigned long, "CHARGE_FULL_DESIGN", "%lu", charge_full_design) \
-    X(unsigned long, "CHARGE_FULL", "%lu", charge_full) \
-    X(unsigned long, "ENERGY_NOW", "%lu", energy_now) \
     X(unsigned long, "CHARGE_NOW", "%lu", charge_now) \
+    X(unsigned long, "CHARGE_FULL", "%lu", charge_full) \
+    X(unsigned long, "CHARGE_FULL_DESIGN", "%lu", charge_full_design) \
+    X(unsigned long, "ENERGY_NOW", "%lu", energy_now) \
+    X(unsigned long, "ENERGY_FULL", "%lu", energy_full) \
+    X(unsigned long, "ENERGY_FULL_DESIGN", "%lu", energy_full_design) \
+    X(unsigned long, "TIME_TO_EMPTY", "%lu", time_to_empty) \
+    X(unsigned long, "TIME_TO_FULL", "%lu", time_to_full) \
     X(unsigned char, "CAPACITY", "%hhu", capacity)
 
 size_t
@@ -133,6 +135,9 @@ play (char ** buf) {
     }
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
+    if ( !seconds && (time_to_empty || time_to_full) ) {
+        seconds = status == CHARGING ? time_to_full : time_to_empty;
+    }
 
     #define min(l, r) (((l) < (r)) ? (l) : (r))
     unsigned long hours = min(seconds / 3600, 999);
@@ -143,8 +148,6 @@ play (char ** buf) {
     signed res = 0;
     if ( hours || minutes || seconds ) {
         res = snprintf(time_estimate, 25, " %.2lu:%.2lu till %s", hours, minutes, when);
-    } else {
-        res = snprintf(time_estimate, 2, "");
     }
 
     res = snprintf(*buf, size, MODFORMAT, capacity, power, time_estimate);
