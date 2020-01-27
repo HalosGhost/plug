@@ -52,7 +52,7 @@ play (char ** buf) {
         return EXIT_FAILURE;
     }
 
-    #define X(t, k, f, v) static t v = 0;
+    #define X(t, k, f, v) t v = 0;
     FOR_EACH_UEVENT_PROPERTY
     #undef X
 
