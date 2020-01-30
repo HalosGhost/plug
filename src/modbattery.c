@@ -83,8 +83,9 @@ play (char ** buf) {
 
     enum battery_status status = strchr("CDEFU", stat_char) ? (enum battery_status )stat_char : UNKNOWN;
 
-    voltage_now /= 1000;
-    voltage_now = voltage_now ? voltage_now : 1;
+    #define max(l, r) (((l) > (r)) ? (l) : (r))
+    voltage_now = max(voltage_now / 1000, 1);
+    #undef max
 
     power_now   /= 1000;
     current_now /= 1000;
