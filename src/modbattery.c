@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <math.h>
 
-#define DEFVALUE "B: 100% (+100W) 999:59 till replenished"
+#define DEFVALUE "B: 100% (+100W) 99:59 till replenished"
 #define MODFORMAT "B: %hhu%% (%+.2lgW)%s"
 
 #define bat_device "BAT0"
@@ -34,8 +34,8 @@ static long samples;
     X(unsigned long, "ENERGY_NOW", "%lu", energy_now) \
     X(unsigned long, "ENERGY_FULL", "%lu", energy_full) \
     X(unsigned long, "ENERGY_FULL_DESIGN", "%lu", energy_full_design) \
-    X(unsigned long, "TIME_TO_EMPTY", "%lu", time_to_empty) \
-    X(unsigned long, "TIME_TO_FULL", "%lu", time_to_full) \
+    X(unsigned long, "TIME_TO_EMPTY_NOW", "%lu", time_to_empty) \
+    X(unsigned long, "TIME_TO_FULL_NOW", "%lu", time_to_full) \
     X(unsigned char, "CAPACITY", "%hhu", capacity)
 
 size_t
@@ -141,14 +141,16 @@ play (char ** buf) {
     }
 
     #define min(l, r) (((l) < (r)) ? (l) : (r))
-    unsigned long hours = min(seconds / 3600, 999);
+    unsigned long hours = min(seconds / 3600, 99);
     unsigned long minutes = min((seconds - hours * 3600) / 60, 59);
     #undef min
 
     const char * when = status == CHARGING ? "replenished" : "depleted";
     signed res = 0;
-    if ( hours || minutes || seconds ) {
+    if ( (hours || minutes || seconds) && (status == CHARGING || status == DISCHARGING) ) {
         res = snprintf(time_estimate, 25, " %.2lu:%.2lu till %s", hours, minutes, when);
+    } else {
+        res = snprintf(time_estimate, 2, "%s", "");
     }
 
     res = snprintf(*buf, size, MODFORMAT, capacity, power, time_estimate);
