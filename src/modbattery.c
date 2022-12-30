@@ -147,7 +147,7 @@ play (char ** buf) {
 
     const char * when = status == CHARGING ? "replenished" : "depleted";
     signed res = 0;
-    if ( (hours || minutes || seconds) && (status == CHARGING || status == DISCHARGING) ) {
+    if ( (hours || minutes) && (status == CHARGING || status == DISCHARGING) ) {
         res = snprintf(time_estimate, 25, " %.2lu:%.2lu till %s", hours, minutes, when);
     } else {
         res = snprintf(time_estimate, 2, "%s", "");
