@@ -14,6 +14,7 @@ signed priority = 50;
 static snd_hctl_t * alsa_handle;
 static snd_ctl_elem_id_t * alsa_sid;
 static snd_ctl_elem_value_t * alsa_control;
+static snd_hctl_elem_t * alsa_element;
 static long volume;
 static char mute;
 
@@ -46,15 +47,20 @@ play (char ** buf) {
     if ( !buf || !*buf ) { return 0; }
 
     snd_ctl_elem_id_set_name(alsa_sid, "Master Playback Volume");
-    snd_hctl_elem_t * alsa_element = snd_hctl_find_elem(alsa_handle, alsa_sid);
+    alsa_element = snd_hctl_find_elem(alsa_handle, alsa_sid);
+    if ( !alsa_element ) {
+        return 0;
+    }
 
     snd_ctl_elem_value_set_id(alsa_control, alsa_sid);
-
     snd_hctl_elem_read(alsa_element, alsa_control);
     volume = snd_ctl_elem_value_get_integer(alsa_control, 0) * 100 / ((1 << 16) - 1);
 
     snd_ctl_elem_id_set_name(alsa_sid, "Master Playback Switch");
     alsa_element = snd_hctl_find_elem(alsa_handle, alsa_sid);
+    if ( !alsa_element ) {
+        return 0;
+    }
 
     snd_ctl_elem_value_set_id(alsa_control, alsa_sid);
 
