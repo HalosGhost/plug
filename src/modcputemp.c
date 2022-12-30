@@ -62,7 +62,7 @@ setup (void) {
 size_t
 play (char ** buf) {
 
-    if ( !buf || !*buf ) { return 0; }
+    if ( !buf || !*buf || !temp_file[0] ) { return 0; }
 
     FILE * f = fopen(temp_file, "r");
     signed res = fscanf(f, "%ld", &temp);
