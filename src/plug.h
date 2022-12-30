@@ -28,3 +28,5 @@ compare_plugins (const void *, const void *);
 char**
 discover_plugins (const char *);
 
+size_t
+load_plugins (const char *, void ***, struct plugin **);

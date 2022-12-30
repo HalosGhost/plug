@@ -89,3 +89,46 @@ compare_plugins (const void * left, const void * right) {
            l > r ?  1 : 0;
 }
 
+size_t
+load_plugins (const char * modpath, void *** handles, struct plugin ** plugins) {
+
+    char ** paths = discover_plugins(modpath);
+
+    size_t modcount = 0;
+    for ( char ** p = paths; *p; p++, modcount++ );
+
+    if ( !modcount ) { goto cleanup; }
+
+    *handles = malloc(sizeof(void *) * modcount);
+    memset(*handles, 0, sizeof(void *) * modcount);
+
+    *plugins = malloc(sizeof(struct plugin) * modcount);
+    memset(*plugins, 0, sizeof(struct plugin) * modcount);
+
+    size_t modpathlen = strlen(modpath) + 1;
+    for ( size_t i = 0; i < modcount; ++i ) {
+        size_t len = modpathlen + strlen(paths[i]) + 2;
+        char * fullpath = malloc(len);
+        snprintf(fullpath, len, "%s/%s", modpath, paths[i]);
+        (*handles)[i] = dlopen(fullpath, RTLD_LAZY);
+
+        free(fullpath);
+        free(paths[i]);
+    }
+
+    fprintf(stderr, "Loaded %zu module(s)\n", modcount);
+
+    for ( size_t i = 0; i < modcount; ++ i ) {
+        (*plugins)[i] = load_plugin((*handles)[i]);
+    }
+
+    qsort(*plugins, modcount, sizeof (struct plugin), compare_plugins);
+    if ( !*plugins ) {
+        modcount = 0;
+    }
+
+    cleanup:
+        free(paths);
+        return modcount;
+}
+

@@ -15,9 +15,6 @@ main (signed argc, char * argv []) {
 
     signed status = EXIT_SUCCESS;
 
-    signal(SIGINT,  signal_handler);
-    signal(SIGQUIT, signal_handler);
-    signal(SIGTERM, signal_handler);
     fputs("\x1b[?25l", stdout);
 
     char * basepath = argc > 1 && argv[1] ? argv[1] : dirname(argv[0]);
@@ -27,41 +24,23 @@ main (signed argc, char * argv []) {
 
     snprintf(modpath, modpathlen, "%s/modules", basepath);
 
-    char ** paths = discover_plugins(modpath);
+    static void ** handles = 0;
+    static struct plugin * plugins = 0;
+    static size_t modcount = 0;
 
-    void ** handles = 0;
-    struct plugin * plugins = 0;
+    setup:
+    signal(SIGHUP,  signal_handler);
+    signal(SIGINT,  signal_handler);
+    signal(SIGQUIT, signal_handler);
+    signal(SIGTERM, signal_handler);
 
-    size_t modcount = 0;
-    for ( char ** p = paths; *p; p++, modcount++ );
-
-    if ( !modcount ) { goto cleanup; }
-
-    handles = malloc(sizeof(void *) * modcount);
-    memset(handles, 0, sizeof(void *) * modcount);
-
-    plugins = malloc(sizeof(struct plugin) * modcount);
-    memset(plugins, 0, sizeof(struct plugin) * modcount);
-
-    for ( size_t i = 0; i < modcount; ++i ) {
-        size_t len = modpathlen + strlen(paths[i]) + 2;
-        char * fullpath = malloc(len);
-        snprintf(fullpath, len, "%s/%s", modpath, paths[i]);
-        handles[i] = dlopen(fullpath, RTLD_LAZY);
-
-        free(fullpath);
-        free(paths[i]);
+    caught_signum = 0;
+    handles = 0;
+    plugins = 0;
+    modcount = load_plugins(modpath, &handles, &plugins);
+    if ( !modcount ) {
+        goto cleanup;
     }
-
-    free(paths);
-
-    fprintf(stderr, "Loaded %zu module(s)\n", modcount);
-
-    for ( size_t i = 0; i < modcount; ++ i ) {
-        plugins[i] = load_plugin(handles[i]);
-    }
-
-    qsort(plugins, modcount, sizeof (struct plugin), compare_plugins);
 
     for ( size_t i = 0; i < modcount; ++ i ) {
         if ( !plugins[i].priority ) { continue; }
@@ -73,6 +52,7 @@ main (signed argc, char * argv []) {
 
     for (;; sleep(1)) {
         if ( !!caught_signum ) {
+            fprintf(stderr, "\nCaught %s\n", strsignal(caught_signum));
             goto teardown;
         }
 
@@ -94,21 +74,21 @@ main (signed argc, char * argv []) {
         if ( plugins[i].teardown ) { plugins[i].teardown(); }
         free(plugins[i].buffer);
     }
+    free(plugins);
+
+    for ( size_t i = 0; i < modcount; ++ i ) {
+        if ( handles[i] ) { dlclose(handles[i]); }
+    }
+    free(handles);
+
+    if ( caught_signum == SIGHUP ) {
+        fputs("Reloading\n", stderr);
+        goto setup; // JUMPS BACKWARDS
+    }
 
     cleanup:
         fputs("\x1b[?25h", stdout);
         if ( modpath ) { free(modpath); }
-
-        if ( handles ) {
-            for ( size_t i = 0; i < modcount; ++ i ) {
-                if ( handles[i] ) { dlclose(handles[i]); }
-            }
-
-            free(handles);
-        }
-
-        if ( plugins ) { free(plugins); }
-
         return status;
 }
 
