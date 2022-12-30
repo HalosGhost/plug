@@ -22,8 +22,8 @@ struct plugin {
 struct plugin
 load_plugin (void *);
 
-int
-compare_plugins (const void *, const void *);
+signed
+has_valid_name (const struct dirent *);
 
 char**
 discover_plugins (const char *);

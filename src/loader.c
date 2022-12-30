@@ -4,39 +4,26 @@ char **
 discover_plugins (const char * path) {
 
     errno = 0;
-    DIR * dir = opendir(path);
-    if ( !dir ) {
+
+    struct dirent ** plugins = 0;
+    signed modcount = scandir(path, &plugins, has_valid_name, alphasort);
+    if ( modcount == -1 ) {
         fprintf(stderr, "Failed to read from %s: %s\n", path, strerror(errno));
         return 0;
-    }
-
-    size_t modcount = 0;
-    for ( struct dirent * p = readdir(dir); p; p = readdir(dir) ) {
-        size_t len = strlen(p->d_name);
-        if ( len > 3 && !strncmp(".so", p->d_name + len - 3, 3)) {
-            ++modcount;
-        }
     }
 
     char ** paths = malloc(sizeof(char *) * (modcount + 1));
     memset(paths, 0, sizeof(char *) * (modcount + 1));
 
-    rewinddir(dir);
-
-    while ( modcount-- > 0 ) {
-        struct dirent * p = readdir(dir);
-        size_t len = strlen(p->d_name);
-        if ( !strncmp(".so", p->d_name + len - 3, 3) ) {
-            paths[modcount] = malloc(len + 2);
-            snprintf(paths[modcount], len + 1, "%s", p->d_name);
-            continue;
-        }
-
-        ++modcount;
+    for ( size_t i = 0; i < (size_t )modcount; ++ i ) {
+        size_t len = strlen(plugins[i]->d_name);
+        paths[i] = malloc(len + 2);
+        snprintf(paths[i], len + 1, "%s", plugins[i]->d_name);
+        free(plugins[i]);
+        continue;
     }
 
-    closedir(dir);
-
+    free(plugins);
     return paths;
 }
 
@@ -80,13 +67,14 @@ load_plugin (void * handle) {
 }
 
 signed
-compare_plugins (const void * left, const void * right) {
+has_valid_name (const struct dirent * e) {
 
-    signed l = *(((const struct plugin * )left)->priority);
-    signed r = *(((const struct plugin * )right)->priority);
+    size_t len = strlen(e->d_name);
+    if ( len > 3 && !strncmp(".so", e->d_name + len - 3, 3)) {
+        return 1;
+    }
 
-    return l < r ? -1 :
-           l > r ?  1 : 0;
+    return 0;
 }
 
 size_t
@@ -120,11 +108,6 @@ load_plugins (const char * modpath, void *** handles, struct plugin ** plugins) 
 
     for ( size_t i = 0; i < modcount; ++ i ) {
         (*plugins)[i] = load_plugin((*handles)[i]);
-    }
-
-    qsort(*plugins, modcount, sizeof (struct plugin), compare_plugins);
-    if ( !*plugins ) {
-        modcount = 0;
     }
 
     cleanup:
