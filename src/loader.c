@@ -27,8 +27,8 @@ discover_plugins (const char * path) {
         struct dirent * p = readdir(dir);
         size_t len = strlen(p->d_name);
         if ( !strncmp(".so", p->d_name + len - 3, 3) ) {
-            paths[modcount] = malloc(len + 1);
-            strncpy(paths[modcount], p->d_name, len);
+            paths[modcount] = malloc(len + 2);
+            snprintf(paths[modcount], len + 1, "%s", p->d_name);
             continue;
         }
 
