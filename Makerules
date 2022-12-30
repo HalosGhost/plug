@@ -1,6 +1,6 @@
 CC ?= clang
-CFLAGS ?= -g -ggdb -O3 -fPIE -flto -fstack-protector-strong --param=ssp-buffer-size=1 -Wall -Wextra -Wpedantic -Werror -std=gnu18 -fsanitize=undefined
-LDFLAGS ?= -ldl
+CFLAGS ?= -Os -fPIE -flto -fstack-protector-strong --param=ssp-buffer-size=1 -Wall -Wextra -Wpedantic -Werror -std=gnu18 -fsanitize=undefined -I$(INCDIR)
+LDFLAGS ?= -ldl $(shell pkg-config --libs-only-l x11)
 VER = v0-`git rev-list --count HEAD`
 
 ifneq ($(CC), tcc)

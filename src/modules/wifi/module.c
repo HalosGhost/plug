@@ -12,7 +12,7 @@
 size_t size = sizeof DEFVALUE;
 signed interval = 30;
 
-#define wl_iface "wlp3s0"
+#define wl_iface "wlan0"
 #define wl_path "/proc/net/wireless"
 
 #define FAIL_OPEN(x) "Failed to open " x

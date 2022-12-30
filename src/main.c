@@ -1,5 +1,7 @@
 #include <signal.h>
 #include <unistd.h>
+#include <X11/Xlib.h>
+#include <syslog.h>
 
 #include "plug.h"
 
@@ -15,7 +17,13 @@ main (signed argc, char * argv []) {
 
     signed status = EXIT_SUCCESS;
 
-    fputs("\x1b[?25l", stdout);
+    openlog(NULL, LOG_CONS, LOG_USER);
+    //fputs("\x1b[?25l", stdout);
+    Display * dpy = XOpenDisplay(NULL);
+    if ( !dpy ) {
+        syslog(LOG_ERR, "Could not open display\n");
+        return EXIT_FAILURE;
+    }
 
     char * basepath = argc > 1 && argv[1] ? argv[1] : dirname(argv[0]);
 
@@ -66,11 +74,11 @@ main (signed argc, char * argv []) {
     static signed amount_written = 1;
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
         if ( !!caught_signum ) {
-            fprintf(stderr, "\nCaught %s\n", strsignal(caught_signum));
+            syslog(LOG_INFO, "Caught %s\n", strsignal(caught_signum));
             goto teardown;
         }
 
-        fputs("\x1b[2K", stdout);
+        //fputs("\x1b[2K", stdout);
         *out_buf = ' ';
         amount_written = 1;
 
@@ -100,9 +108,12 @@ main (signed argc, char * argv []) {
             }
         }
 
-        fputs(out_buf, stdout);
-        putchar('\r');
-        fflush(stdout);
+        //fputs(out_buf, stdout);
+        //putchar('\r');
+        //fflush(stdout);
+
+        XStoreName(dpy, DefaultRootWindow(dpy), out_buf);
+        XSync(dpy, False);
         sleep(PAINT_INTERVAL);
     }
 
@@ -126,7 +137,8 @@ main (signed argc, char * argv []) {
     }
 
     cleanup:
-        fputs("\x1b[?25h", stdout);
+        //fputs("\x1b[?25h", stdout);
+        XCloseDisplay(dpy);
         if ( modpath ) { free(modpath); }
         return status;
 }

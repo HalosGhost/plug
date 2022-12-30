@@ -6,10 +6,11 @@
 #include <limits.h>
 #include <math.h>
 
-#define DEFVALUE "B: 100% (+100W) 99:59 till replenished"
+// note the extra spaces (for colorization)
+#define DEFVALUE " B: 100% (+100W) 99:59 till replenished "
 #define MODFORMAT "B: %hhu%% (%+.2lgW)%s"
 
-#define bat_device "BAT0"
+#define bat_device "cw2015-battery"
 #define bat_path "/sys/class/power_supply/" bat_device
 
 #define FAIL_OPEN(x) "Failed to open " x
@@ -107,6 +108,9 @@ play (char ** buf) {
     }
 
     for ( ; rate >= 10000; rate /= 10 );
+    if ( status == CHARGING ) {
+        rate *= 1000;
+    }
 
     unsigned long max_capacity = charge_full        ? charge_full        :
                                  energy_full        ? energy_full        :
@@ -153,7 +157,14 @@ play (char ** buf) {
         res = snprintf(time_estimate, 2, "%s", "");
     }
 
-    res = snprintf(*buf, size, MODFORMAT, capacity, power, time_estimate);
+    res = 0;
+    if ( capacity <= 15 ) {
+        res = snprintf(*buf, 2, "%1c", 3 + !(capacity > 5));
+    }
+    res += snprintf(*buf + res, size, MODFORMAT, capacity, power, time_estimate);
+    if ( capacity <= 15 ) {
+        res += snprintf(*buf + res, 2, "%1c", 1);
+    }
 
     return res > 0 ? (size_t )res : 0;
 }
