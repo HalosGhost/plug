@@ -6,7 +6,7 @@
 #define MODFORMAT "%A, %d %B %Y"
 
 size_t size = sizeof DEFVALUE;
-signed priority = 90;
+signed interval = 3600;
 
 size_t
 play (char ** buf) {

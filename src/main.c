@@ -56,15 +56,15 @@ main (signed argc, char * argv []) {
     memset(out_buf, 0, out_len);
 
     for ( size_t i = 0; i < modcount; ++ i ) {
-        if ( !plugins[i].priority ) { continue; }
+        if ( !plugins[i].interval ) { continue; }
 
         if ( plugins[i].setup ) {
-            if ( !plugins[i].setup() ) { plugins[i].priority = 0; continue; }
+            if ( !plugins[i].setup() ) { plugins[i].interval = 0; continue; }
         }
     }
 
     static signed amount_written = 1;
-    for (;; sleep(1)) {
+    for ( time_t c_time = 0; ; c_time = time(NULL) ) {
         if ( !!caught_signum ) {
             fprintf(stderr, "\nCaught %s\n", strsignal(caught_signum));
             goto teardown;
@@ -75,9 +75,15 @@ main (signed argc, char * argv []) {
         amount_written = 1;
 
         for ( size_t i = 0; i < modcount; ++ i ) {
-            if ( !plugins[i].priority ) { continue; }
+            if ( !plugins[i].interval ) { continue; }
 
-            if ( !plugins[i].play(&plugins[i].buffer) ) { continue; }
+            if ( !(c_time % *(plugins[i].interval)) ) {
+                 if ( !plugins[i].play(&plugins[i].buffer) ) {
+                    plugins[i].interval = 0; // disable module if play() fails
+                    continue;
+                }
+            }
+
             amount_written += snprintf(
                 out_buf + amount_written,
                 *(plugins[i].size),
@@ -97,6 +103,7 @@ main (signed argc, char * argv []) {
         fputs(out_buf, stdout);
         putchar('\r');
         fflush(stdout);
+        sleep(PAINT_INTERVAL);
     }
 
     teardown:

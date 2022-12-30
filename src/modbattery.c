@@ -15,7 +15,7 @@
 #define FAIL_OPEN(x) "Failed to open " x
 
 size_t size = sizeof DEFVALUE;
-signed priority = 60;
+signed interval = 30;
 
 static double power;
 static char time_estimate [25] = "";

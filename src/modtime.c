@@ -2,11 +2,11 @@
 
 #include <time.h>
 
-#define DEFVALUE "00.00 (UTC)" /* "Wednesday, 01 September 00001" */
+#define DEFVALUE "00.00 (UTC)"
 #define MODFORMAT "%H.%M (%Z)"
 
 size_t size = sizeof DEFVALUE;
-signed priority = 80;
+signed interval = 15;
 
 size_t
 play (char ** buf) {

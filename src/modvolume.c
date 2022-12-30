@@ -7,7 +7,7 @@
 #define MODFORMAT "A: %hhd%c"
 
 size_t size = sizeof DEFVALUE;
-signed priority = 50;
+signed interval = 15;
 
 #define audio_dev "default"
 
@@ -63,7 +63,6 @@ play (char ** buf) {
     }
 
     snd_ctl_elem_value_set_id(alsa_control, alsa_sid);
-
     snd_hctl_elem_read(alsa_element, alsa_control);
     mute = snd_ctl_elem_value_get_boolean(alsa_control, 0) ? '%' : 'M';
 

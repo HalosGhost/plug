@@ -38,7 +38,7 @@ load_plugin (void * handle) {
     const char * dlerr = dlerror();
     if ( dlerr ) {
         fprintf(stderr, "Failed to find play: %s\n", dlerr);
-        p.priority = 0;
+        p.interval = 0;
     }
 
     *(void **)(&p.teardown) = dlsym(handle, "teardown");
@@ -48,18 +48,18 @@ load_plugin (void * handle) {
     dlerr = dlerror();
     if ( dlerr ) {
         fprintf(stderr, "Failed to find size: %s\n", dlerr);
-        p.priority = 0;
+        p.interval = 0;
     }
 
     dlerror();
-    *(void **)(&p.priority) = dlsym(handle, "priority");
+    *(void **)(&p.interval) = dlsym(handle, "interval");
     dlerr = dlerror();
     if ( dlerr ) {
-        fprintf(stderr, "Failed to find priority: %s\n", dlerr);
-        p.priority = 0;
+        fprintf(stderr, "Failed to find interval: %s\n", dlerr);
+        p.interval = 0;
     }
 
-    if ( !p.priority ) { return p; }
+    if ( !p.interval ) { return p; }
 
     p.buffer = malloc(*p.size);
 

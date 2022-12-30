@@ -11,7 +11,7 @@ do { \
 } while ( false )
 
 extern size_t size;
-extern signed priority;
+extern signed interval;
 
 signed
 setup (void);

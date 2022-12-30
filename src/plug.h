@@ -7,11 +7,13 @@
 #include <libgen.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <time.h>
 
 #define MODSEP " | "
+#define PAINT_INTERVAL 1
 
 struct plugin {
-    signed * priority;
+    signed * interval;
     size_t * size;
     signed (* setup)(void);
     size_t (* play)(char **);
