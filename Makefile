@@ -17,7 +17,7 @@ RM := rm -rf --
 
 include Makerules
 
-.PHONY: all bin clean lib run install uninstall
+.PHONY: all bin clean lib run debug install uninstall
 
 all: $(MODULES) bin
 
@@ -41,6 +41,9 @@ clean:
 
 run: all
 	(pushd $(BLDDIR); LD_LIBRARY_PATH=. ./$(PROGNM))
+
+debug: all
+	(pushd $(BLDDIR); LD_LIBRARY_PATH=. gdb ./$(PROGNM))
 
 install:
 	install -Dm755 $(BLDDIR)/$(PROGNM) $(BINDIR)/$(PROGNM)
