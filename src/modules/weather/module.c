@@ -3,12 +3,12 @@
 #include <stdbool.h>
 #include <curl/curl.h>
 
-#define DEFVALUE "AIR: Partly cloudy ⛅️ (+100°F) +100°F"
+#define DEFVALUE "AIR: ⛅️ (+100°F) +100°F"
 
 #define DOMAIN "https://wttr.in"
 #define AIRPORT "MSP"
 #define UNIT "u" /* "m" for metric */
-#define OUTFORMAT "%C+%c(%t)+%f"
+#define OUTFORMAT "%c%t+(%f)"
 
 #define min(n, m) (((n) < (m)) ? (n) : (m))
 
@@ -21,7 +21,7 @@ static CURL * handle;
 static size_t
 cb (void * buf, size_t sz, size_t nmemb, void * userp) {
 
-    memcpy(userp, buf, sizeof DEFVALUE);
+    snprintf(userp, sizeof DEFVALUE, "%s: %s", AIRPORT, (char * )buf);
 
     return min(sz * nmemb, sizeof DEFVALUE);
 }
