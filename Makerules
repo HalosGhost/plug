@@ -1,5 +1,5 @@
 CC ?= clang
-CFLAGS ?= -Os -fPIE -flto -fstack-protector-strong --param=ssp-buffer-size=1 -Wall -Wextra -Wpedantic -Werror -std=gnu18 -fsanitize=undefined -I$(INCDIR)
+CFLAGS ?= -Os -fPIE -flto -fstack-protector-strong --param=ssp-buffer-size=1 -Wall -Wextra -Wpedantic -Werror -std=gnu18 -fsanitize=undefined -I$(HDRDIR)
 LDFLAGS ?= -ldl $(shell pkg-config --libs-only-l x11)
 VER = v0-`git rev-list --count HEAD`
 

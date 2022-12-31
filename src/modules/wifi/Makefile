@@ -1,6 +1,6 @@
 NAME := $(shell basename "$$PWD")
 
-CFLAGS += -I$(INCDIR)
+CFLAGS += -I$(HDRDIR)
 LINKFLAGS := #$(shell pkg-config --libs-only-l)
 
 $(BLDDIR)/$(NAME).so: module.c

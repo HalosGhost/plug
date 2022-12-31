@@ -1,14 +1,4 @@
-#include <signal.h>
-#include <unistd.h>
-#include <X11/Xlib.h>
-#include <syslog.h>
-
-#include "plug.h"
-
-static volatile sig_atomic_t caught_signum;
-
-void
-signal_handler (signed);
+#include "main.h"
 
 signed
 main (signed argc, char * argv []) {
@@ -17,20 +7,45 @@ main (signed argc, char * argv []) {
 
     signed status = EXIT_SUCCESS;
 
-    openlog(NULL, LOG_CONS, LOG_USER);
-    //fputs("\x1b[?25l", stdout);
-    Display * dpy = XOpenDisplay(NULL);
-    if ( !dpy ) {
-        syslog(LOG_ERR, "Could not open display\n");
+    bool color_flag = false;
+    char color_arg [7] = "auto";
+    enum sink sink_switch = X11_ROOT;
+
+    char * prognm = basename(argv[0]);
+    char * modpath = 0;
+    Display * dpy = 0;
+
+    const char * vos = "hls:c:";
+    for ( signed oi = 0, c = getopt_long(argc, argv, vos, os, &oi);
+          c != -1; c = getopt_long(argc, argv, vos, os, &oi) ) {
+        switch ( c ) {
+            case 'c': snprintf(color_arg, 7, "%s", optarg); break;
+            case 'h': puts(usage_str); goto cleanup;
+            case 'l': list_modules(prognm); goto cleanup;
+            case 's': sink_switch = *optarg != 'x'; break;
+        }
+    }
+
+    color_flag = !strncmp(color_arg, "auto", 4) ? sink_switch != STDOUT :
+                 !strncmp(color_arg, "always", 7);
+
+    (void )color_flag; // todo: expose this to modules
+    modpath = module_path(prognm);
+    if ( !modpath ) {
+        fputs("No suitable module path found\n", stderr);
         return EXIT_FAILURE;
     }
 
-    char * basepath = argc > 1 && argv[1] ? argv[1] : dirname(argv[0]);
-
-    size_t modpathlen = strlen(basepath) + sizeof "/modules";
-    char * modpath = malloc(modpathlen);
-
-    snprintf(modpath, modpathlen, "%s/modules", basepath);
+    openlog(NULL, LOG_CONS, LOG_USER);
+    if ( sink_switch == X11_ROOT ) {
+        dpy = XOpenDisplay(NULL);
+        if ( !dpy ) {
+            syslog(LOG_ERR, "Could not open display\n");
+            return EXIT_FAILURE;
+        }
+    } else {
+        fputs("\x1b[?25l", stdout);
+    }
 
     static void ** handles = 0;
     static struct plugin * plugins = 0;
@@ -78,7 +93,6 @@ main (signed argc, char * argv []) {
             goto teardown;
         }
 
-        //fputs("\x1b[2K", stdout);
         *out_buf = ' ';
         amount_written = 1;
 
@@ -108,12 +122,15 @@ main (signed argc, char * argv []) {
             }
         }
 
-        //fputs(out_buf, stdout);
-        //putchar('\r');
-        //fflush(stdout);
+        if ( dpy ) {
+            XStoreName(dpy, DefaultRootWindow(dpy), out_buf);
+            XSync(dpy, False);
+        } else {
+            fputs(out_buf, stdout);
+            putchar('\r');
+            fflush(stdout);
+        }
 
-        XStoreName(dpy, DefaultRootWindow(dpy), out_buf);
-        XSync(dpy, False);
         sleep(PAINT_INTERVAL);
     }
 
@@ -137,8 +154,11 @@ main (signed argc, char * argv []) {
     }
 
     cleanup:
-        //fputs("\x1b[?25h", stdout);
-        XCloseDisplay(dpy);
+        if ( dpy ) {
+            XCloseDisplay(dpy);
+        } else {
+            printf("\x1b[?25h");
+        }
         if ( modpath ) { free(modpath); }
         return status;
 }
@@ -149,3 +169,61 @@ signal_handler (signed signum) {
     caught_signum = (sig_atomic_t )signum;
 }
 
+char *
+module_path (const char * name) {
+
+    if ( !name ) {
+        return NULL;
+    }
+
+    char modpath [PATH_MAX + 1] = "";
+
+    char * xdg = getenv("XDG_CONFIG_HOME");
+    if ( xdg ) {
+        snprintf(modpath, PATH_MAX - 1, "%s/%s/modules.d", xdg, name);
+        DIR * d = opendir(modpath);
+        if ( d ) {
+            closedir(d);
+            return strdup(modpath);
+        }
+    }
+
+    char * home = getenv("HOME");
+    if ( home ) {
+        snprintf(modpath, PATH_MAX - 1, "%s/.%s/modules.d", home, name);
+        DIR * d = opendir(modpath);
+        if ( d ) {
+            closedir(d);
+            return strdup(modpath);
+        }
+    }
+
+    snprintf(modpath, PATH_MAX - 1, "/etc/%s/modules.d", name);
+    DIR * d = opendir(modpath);
+    if ( d ) {
+        closedir(d);
+        return strdup(modpath);
+    }
+
+    return NULL;
+}
+
+void
+list_modules (const char * name) {
+
+    char path [PATH_MAX + 1] = "";
+    snprintf(path, PATH_MAX - 1, "%s/lib/%s/modules", PREFIX, name);
+    char ** plugins = discover_plugins(path);
+    if ( !plugins ) {
+        fputs("No plugins found.\n", stderr);
+        return;
+    }
+
+    printf("Known modules:\n");
+    for ( char ** p = plugins; *p; ++p ) {
+        printf("\t%s/%s\n", path, *p);
+        free(*p);
+    }
+
+    free(plugins);
+}
