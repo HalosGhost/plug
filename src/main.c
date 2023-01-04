@@ -20,7 +20,7 @@ main (signed argc, char * argv []) {
           c != -1; c = getopt_long(argc, argv, vos, os, &oi) ) {
         switch ( c ) {
             case 'c': snprintf(color_arg, 7, "%s", optarg); break;
-            case 'h': puts(usage_str); goto cleanup;
+            case 'h': printf(usage_str, prognm, prognm); goto cleanup;
             case 'l': list_modules(prognm); goto cleanup;
             case 's': sink_switch = *optarg != 'x'; break;
         }

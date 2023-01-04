@@ -53,6 +53,6 @@ static const char usage_str [] =
     "  -l, --list           List available modules\n"
     "  -s, --sink=<sink>    Where to write output; <sink>\n"
     "                       can be \"x11-root\" (default)\n"
-    "                       or \"stdout\"";
+    "                       or \"stdout\"\n";
 
 #endif
