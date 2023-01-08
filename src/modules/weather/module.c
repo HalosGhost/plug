@@ -61,6 +61,7 @@ play (char ** buf) {
         return sizeof DEFVALUE;
     }
 
+    MODLOG(LOG_ERR, "%s", curl_easy_strerror(ret));
     return 0;
 }
 

@@ -49,7 +49,7 @@ play (char ** buf) {
     errno = 0;
     if ( ioctl(sock, SIOCGIWESSID, &w) == -1 ) {
         errsv = errno;
-        fprintf(stderr, FAIL_IOCTL("SIOCGIWESSID") ": %s\n", strerror(errsv));
+        MODLOG(LOG_ERR, FAIL_IOCTL("SIOCGIWESSID") ": %s\n", strerror(errsv));
         goto cleanup;
     }
 
@@ -60,7 +60,7 @@ play (char ** buf) {
     errno = 0;
     if ( ioctl(sock, SIOCGIWRANGE, &w) == -1 ) {
         errsv = errno;
-        fprintf(stderr, FAIL_IOCTL("SIOCGIWRANGE") ": %s\n", strerror(errsv));
+        MODLOG(LOG_ERR, FAIL_IOCTL("SIOCGIWRANGE") ": %s\n", strerror(errsv));
         goto cleanup;
     }
 
@@ -68,7 +68,7 @@ play (char ** buf) {
     in = fopen(wl_path, "r");
     if ( !in ) {
         errsv = errno;
-        fprintf(stderr, FAIL_OPEN(wl_path) ": %s\n", strerror(errsv));
+        MODLOG(LOG_ERR, FAIL_OPEN(wl_path) ": %s\n", strerror(errsv));
         strength = 0;
         goto cleanup;
     }
@@ -77,7 +77,7 @@ play (char ** buf) {
     unsigned char n = 0;
     if ( fscanf(in, "%*[^\n]\n%*[^\n]\n" wl_iface ": %*d %hhu.", &n) != 1 ) {
         errsv = errno;
-        fprintf(stderr, FAIL_READ(wl_path) ": %s\n", strerror(errsv));
+        MODLOG(LOG_ERR, FAIL_READ(wl_path) ": %s\n", strerror(errsv));
         strength = 0;
         goto cleanup;
     }

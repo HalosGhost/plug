@@ -49,8 +49,8 @@ play (char ** buf) {
     FILE * in = fopen(bat_path "/uevent", "r");
     if ( !in ) {
         errsv = errno;
-        fprintf(stderr, FAIL_OPEN(bat_path) "/uevent: %s\n", strerror(errsv));
-        return EXIT_FAILURE;
+        MODLOG(LOG_ERR, FAIL_OPEN(bat_path) "/uevent: %s\n", strerror(errsv));
+        return 0;
     }
 
     #define X(t, k, f, v) t v = 0;

@@ -23,13 +23,13 @@ setup (void) {
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
-        fprintf(stderr, "Could not allocate ALSA element\n");
+        MODLOG(LOG_ERR, "%s\n", "Could not allocate ALSA element");
         return 0;
     }
 
     snd_ctl_elem_value_malloc(&alsa_control);
     if ( !alsa_control ) {
-        fprintf(stderr, "Could not allocate ALSA control\n");
+        MODLOG(LOG_ERR, "%s\n", "Could not allocate ALSA control");
         return 0;
     }
 
