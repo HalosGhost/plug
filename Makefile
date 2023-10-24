@@ -5,6 +5,8 @@ BINDIR ?= $(DESTDIR)$(PREFIX)/bin
 LIBDIR ?= $(DESTDIR)$(PREFIX)/lib
 INCDIR ?= $(DESTDIR)$(PREFIX)/include
 
+RTDIR = $(shell git rev-parse --show-toplevel)
+
 SRCDIR = $(PWD)/src
 HDRDIR = $(PWD)/inc
 BLDDIR = $(PWD)/bld
@@ -23,7 +25,7 @@ all: $(MODULES) bin
 
 $(BLDDIR)/modules/%.so: $(SRCDIR)/modules/% $(HDRDIR)/plug.h
 	$(MKDIR) $(@D)
-	(cd $<; $(MAKE) BLDDIR=$(@D) HDRDIR=$(HDRDIR) CFLAGS="$(CFLAGS)")
+	(cd $<; $(MAKE) _CFLAGS="$(_CFLAGS)" BLDDIR=$(@D) HDRDIR=$(HDRDIR) RTDIR=$(RTDIR))
 
 lib: $(BLDDIR)/lib$(PROGNM).so
 
