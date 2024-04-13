@@ -46,7 +46,8 @@ play (char ** buf) {
 
     signed errsv = 0;
     errno = 0;
-    FILE * in = fopen(bat_path "/uevent", "r");
+    const char * uev = bat_path "/uevent";
+    FILE * in = fopen(uev, "r");
     if ( !in ) {
         errsv = errno;
         MODLOG(LOG_ERR, FAIL_OPEN(bat_path) "/uevent: %s\n", strerror(errsv));
@@ -65,7 +66,13 @@ play (char ** buf) {
             sscanf(val, f, &v); \
         } else
 
-    while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
+    size_t line_len = 0;
+    char * line = NULL;
+    while ( getline(&line, &line_len, in) != EOF ) {
+        if ( sscanf(line, "POWER_SUPPLY_%[^=]=%23s", key, val) != 2 ) {
+            continue;
+        }
+
         FOR_EACH_UEVENT_PROPERTY {
             continue;
         }
